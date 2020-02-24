@@ -13,6 +13,7 @@ public class Contact {
     private final int contactId;
     private final String email;
     private final String phoneNumber;
+    private final String serviceAddress;
 
     public Contact() {
         developerId = 0;
@@ -20,5 +21,6 @@ public class Contact {
         contactId = 0;
         email = null;
         phoneNumber = null;
+        serviceAddress = null;
     }
 }

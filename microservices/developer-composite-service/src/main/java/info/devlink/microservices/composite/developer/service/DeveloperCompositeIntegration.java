@@ -65,10 +65,10 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
     public Developer getDeveloper(int developerId) {
         try {
             String url = developerServiceUrl + developerId;
-            LOG.debug("Will call getProduct API on URL: {}", url);
+            LOG.debug("Will call getDeveloper API on URL: {}", url);
 
             Developer developer = restTemplate.getForObject(url, Developer.class);
-            LOG.debug("Found a product with id: {}", developer.getDeveloperId());
+            LOG.debug("Found a developer with id: {}", developer.getDeveloperId());
 
             return developer;
 
@@ -123,7 +123,7 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
             LOG.debug("Will call getRecruiters API on URL: {}", url);
             List<Recruiter> recruiters = restTemplate.exchange(url, GET, null, new ParameterizedTypeReference<List<Recruiter>>() {}).getBody();
 
-            LOG.debug("Found {} recruiters for a product with id: {}", recruiters.size(), developerId);
+            LOG.debug("Found {} recruiters for a developer with id: {}", recruiters.size(), developerId);
             return recruiters;
 
         } catch (Exception ex) {

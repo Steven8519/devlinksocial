@@ -24,9 +24,9 @@ public class DeveloperServiceImpl implements DeveloperService {
     @Override
     public Developer getDeveloper(int developerId) {
         LOG.debug("/developer return the found developer for developerId={}", developerId);
-        if (developerId < 1) throw new InvalidInputException("Invalid productId: " + developerId);
+        if (developerId < 1) throw new InvalidInputException("Invalid developerId: " + developerId);
 
-        if (developerId == 13) throw new NotFoundException("No product found for productId: " + developerId);
+        if (developerId == 13) throw new NotFoundException("No developer found for developerId: " + developerId);
 
         return new Developer(developerId, "Sam", "Thomas", "Software Engineer", serviceUtil.getServiceAddress());
     }
