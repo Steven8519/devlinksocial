@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class DeveloperCompositeServiceImpl implements DeveloperCompositeService {
 
     private final ServiceUtil serviceUtil;
-    private  DeveloperCompositeIntegration integration;
+    private DeveloperCompositeIntegration integration;
 
     @Autowired
     public DeveloperCompositeServiceImpl(ServiceUtil serviceUtil, DeveloperCompositeIntegration integration) {

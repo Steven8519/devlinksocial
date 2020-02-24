@@ -1,0 +1,17 @@
+server.port: 8000
+
+app:
+  developer-service:
+    host: localhost
+    port: 8001
+  recruiter-service:
+    host: localhost
+    port: 8002
+  contact-service:
+    host: localhost
+    port: 8003
+
+logging:
+  level:
+    root: INFO
+    se.magnus: DEBUG
