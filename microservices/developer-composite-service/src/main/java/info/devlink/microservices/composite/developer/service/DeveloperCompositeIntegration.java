@@ -37,32 +37,31 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
     private final String recruiterServiceUrl;
     private final String contactServiceUrl;
 
-
     @Autowired
     public DeveloperCompositeIntegration(
             RestTemplate restTemplate,
             ObjectMapper mapper,
 
             @Value("${app.developer-service.host}") String developerServiceHost,
-            @Value("${app.developer-service.port}") int developerServicePort,
+            @Value("${app.developer-service.port}") int    developerServicePort,
 
             @Value("${app.recruiter-service.host}") String recruiterServiceHost,
-            @Value("${app.recruiter-service.port}") int recruiterServicePort,
+            @Value("${app.recruiter-service.port}") int    recruiterServicePort,
 
             @Value("${app.contact-service.host}") String contactServiceHost,
-            @Value("${app.contact-service.port}") int contactServicePort
+            @Value("${app.contact-service.port}") int    contactServicePort
     ) {
 
         this.restTemplate = restTemplate;
         this.mapper = mapper;
 
-        developerServiceUrl = "http://" + developerServiceHost + ":" + developerServicePort + "/developer/";
+        developerServiceUrl        = "http://" + developerServiceHost + ":" + developerServicePort + "/developer/";
         recruiterServiceUrl = "http://" + recruiterServiceHost + ":" + recruiterServicePort + "/recruiter?developerId=";
-        contactServiceUrl = "http://" + contactServiceHost + ":" + contactServicePort + "/contact?developerId=";
+        contactServiceUrl         = "http://" + contactServiceHost + ":" + contactServicePort + "/contact?developerId=";
     }
 
-    @Override
     public Developer getDeveloper(int developerId) {
+
         try {
             String url = developerServiceUrl + developerId;
             LOG.debug("Will call getDeveloper API on URL: {}", url);
@@ -98,25 +97,8 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
         }
     }
 
-    @Override
-    public List<Contact> getContacts(int developerId) {
-        try {
-            String url = contactServiceUrl + developerId;
-
-            LOG.debug("Will call getContacts API on URL: {}", url);
-            List<Contact> contacts = restTemplate.exchange(url, GET, null, new ParameterizedTypeReference<List<Contact>>() {}).getBody();
-
-            LOG.debug("Found {} developers for a developer with id: {}", contacts.size(), developerId);
-            return contacts;
-
-        } catch (Exception ex) {
-            LOG.warn("Got an exception while requesting contacts, return zero contacts: {}", ex.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    @Override
     public List<Recruiter> getRecruiters(int developerId) {
+
         try {
             String url = recruiterServiceUrl + developerId;
 
@@ -128,6 +110,23 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
 
         } catch (Exception ex) {
             LOG.warn("Got an exception while requesting recruiters, return zero recruiters: {}", ex.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Contact> getContacts(int developerId) {
+
+        try {
+            String url = contactServiceUrl + developerId;
+
+            LOG.debug("Will call getContacts API on URL: {}", url);
+            List<Contact> contacts = restTemplate.exchange(url, GET, null, new ParameterizedTypeReference<List<Contact>>() {}).getBody();
+
+            LOG.debug("Found {} contacts for a developer with id: {}", contacts.size(), developerId);
+            return contacts;
+
+        } catch (Exception ex) {
+            LOG.warn("Got an exception while requesting contacts, return zero contacts: {}", ex.getMessage());
             return new ArrayList<>();
         }
     }
