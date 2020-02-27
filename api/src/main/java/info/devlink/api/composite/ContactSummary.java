@@ -9,6 +9,7 @@ import lombok.Getter;
 @Getter
 public class ContactSummary {
     private final int contactId;
+    private final int recruiterId;
     private final String email;
     private final String phoneNumber;
 }

@@ -15,8 +15,8 @@ public class DeveloperAggregate {
     private final String firstName;
     private final String lastName;
     private final String developerType;
-    private final List<ContactSummary> contactSummaries;
-    private final List<RecruiterSummary> recruiterSummaries;
+    private final List<RecruiterSummary> recruiters;
+    private final List<ContactSummary> contacts;
     private final ServiceAddresses serviceAddresses;
 
 }

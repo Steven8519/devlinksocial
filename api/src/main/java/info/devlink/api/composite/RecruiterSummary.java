@@ -8,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class RecruiterSummary {
+    private final int developerId;
     private final int RecruiterId;
     private final String recruiterName;
     private final String recruiterCompany;

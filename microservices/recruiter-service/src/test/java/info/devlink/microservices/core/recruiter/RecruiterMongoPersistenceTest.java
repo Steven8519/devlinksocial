@@ -65,7 +65,7 @@ public class RecruiterMongoPersistenceTest {
     }
 
     @Test
-    public void getByProductId() {
+    public void getByDeveloperId() {
         List<RecruiterEntity> entityList = repository.findByDeveloperId(savedEntity.getDeveloperId());
 
         assertThat(entityList, hasSize(1));

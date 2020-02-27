@@ -5,7 +5,6 @@ import lombok.*;
 import javax.persistence.*;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -25,4 +24,12 @@ public class ContactEntity {
     private int contactId;
     private String email;
     private String phoneNumber;
+
+    public ContactEntity(int developerId, int recruiterId, int contactId, String email, String phoneNumber) {
+        this.developerId = developerId;
+        this.recruiterId = recruiterId;
+        this.contactId = contactId;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
 }
