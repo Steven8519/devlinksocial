@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table(name = "contacts", indexes = { @Index(name = "contacts_unique_idx", unique = true, columnList = "developerId,contactId") })
-public class Contact {
+public class ContactEntity {
 
     @Id
     @GeneratedValue

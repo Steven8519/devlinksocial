@@ -1,6 +1,6 @@
 package info.devlink.microservices.core.developer;
 
-import info.devlink.microservices.core.developer.domain.Developer;
+import info.devlink.microservices.core.developer.domain.DeveloperEntity;
 import info.devlink.microservices.core.developer.repository.DeveloperRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,13 +29,13 @@ public class DeveloperMongoPersistenceTest {
     @Autowired
     private DeveloperRepository repository;
 
-    private Developer savedDeveloper;
+    private DeveloperEntity savedDeveloper;
 
     @Before
     public void setupDb() {
         repository.deleteAll();
 
-        Developer developer = new Developer(1, "Michael", "Turner", "Reactjs Developer");
+        DeveloperEntity developer = new DeveloperEntity(1, "Michael", "Turner", "Reactjs Developer");
         savedDeveloper = repository.save(developer);
 
         assertEqualsDeveloper(developer, savedDeveloper);
@@ -44,10 +44,10 @@ public class DeveloperMongoPersistenceTest {
     @Test
     public void create() {
 
-        Developer newEntity = new Developer(2, "Chris", "Mathis", "Python Developer");
+        DeveloperEntity newEntity = new DeveloperEntity(2, "Chris", "Mathis", "Python Developer");
         repository.save(newEntity);
 
-        Developer foundEntity = repository.findById(newEntity.getId()).get();
+        DeveloperEntity foundEntity = repository.findById(newEntity.getId()).get();
         assertEqualsDeveloper(newEntity, foundEntity);
 
         assertEquals(2, repository.count());
@@ -58,7 +58,7 @@ public class DeveloperMongoPersistenceTest {
         savedDeveloper.setLastName("Mathis");
         repository.save(savedDeveloper);
 
-        Developer foundEntity = repository.findById(savedDeveloper.getId()).get();
+        DeveloperEntity foundEntity = repository.findById(savedDeveloper.getId()).get();
         assertEquals(1, (long) foundEntity.getVersion());
         assertEquals("Mathis", foundEntity.getLastName());
     }
@@ -71,7 +71,7 @@ public class DeveloperMongoPersistenceTest {
 
     @Test
     public void getByDeveloperId() {
-        Optional<Developer> entity = repository.findByDeveloperId(savedDeveloper.getDeveloperId());
+        Optional<DeveloperEntity> entity = repository.findByDeveloperId(savedDeveloper.getDeveloperId());
 
         assertTrue(entity.isPresent());
         assertEqualsDeveloper(savedDeveloper, entity.get());
@@ -79,7 +79,7 @@ public class DeveloperMongoPersistenceTest {
 
     @Test(expected = DuplicateKeyException.class)
     public void duplicateError() {
-        Developer entity = new Developer(savedDeveloper.getDeveloperId(), "Chris", "Mathis", "Python Developer");
+        DeveloperEntity entity = new DeveloperEntity(savedDeveloper.getDeveloperId(), "Chris", "Mathis", "Python Developer");
         repository.save(entity);
     }
 
@@ -87,14 +87,14 @@ public class DeveloperMongoPersistenceTest {
     public void optimisticLockError() {
 
         // Store the saved entity in two separate entity objects
-        Developer entity1 = repository.findById(savedDeveloper.getId()).get();
-        Developer entity2 = repository.findById(savedDeveloper.getId()).get();
+        DeveloperEntity entity1 = repository.findById(savedDeveloper.getId()).get();
+        DeveloperEntity entity2 = repository.findById(savedDeveloper.getId()).get();
 
         // Update the entity using the first entity object
         entity1.setLastName("Hill");
         repository.save(entity1);
 
-        //  Update the entity using the second entity object.
+        // Update the entity using the second entity object.
         // This should fail since the second entity now holds a old version number, i.e. a Optimistic Lock Error
         try {
             entity2.setLastName("James");
@@ -104,7 +104,7 @@ public class DeveloperMongoPersistenceTest {
         } catch (OptimisticLockingFailureException e) {}
 
         // Get the updated entity from the database and verify its new sate
-        Developer updatedEntity = repository.findById(savedDeveloper.getId()).get();
+        DeveloperEntity updatedEntity = repository.findById(savedDeveloper.getId()).get();
         assertEquals(1, (int) updatedEntity.getVersion());
         assertEquals("Hill", updatedEntity.getLastName());
     }
@@ -114,8 +114,8 @@ public class DeveloperMongoPersistenceTest {
 
         repository.deleteAll();
 
-        List<Developer> newDevelopers = rangeClosed(1001, 1010)
-                .mapToObj(i -> new Developer(i, "Michael " , "Turner", "Reactjs Developer"))
+        List<DeveloperEntity> newDevelopers = rangeClosed(1001, 1010)
+                .mapToObj(i -> new DeveloperEntity(i, "Michael " , "Turner", "Reactjs Developer"))
                 .collect(Collectors.toList());
         repository.saveAll(newDevelopers);
 
@@ -126,13 +126,13 @@ public class DeveloperMongoPersistenceTest {
     }
 
     private Pageable testNextPage(Pageable nextPage, String expectedDeveloperIds, boolean expectsNextPage) {
-        Page<Developer> developerPage = repository.findAll(nextPage);
+        Page<DeveloperEntity> developerPage = repository.findAll(nextPage);
         assertEquals(expectedDeveloperIds, developerPage.getContent().stream().map(p -> p.getDeveloperId()).collect(Collectors.toList()).toString());
         assertEquals(expectsNextPage, developerPage.hasNext());
         return developerPage.nextPageable();
     }
 
-    private void assertEqualsDeveloper(Developer expectedEntity, Developer actualEntity) {
+    private void assertEqualsDeveloper(DeveloperEntity expectedEntity, DeveloperEntity actualEntity) {
         assertEquals(expectedEntity.getId(),               actualEntity.getId());
         assertEquals(expectedEntity.getVersion(),          actualEntity.getVersion());
         assertEquals(expectedEntity.getDeveloperId(),        actualEntity.getDeveloperId());

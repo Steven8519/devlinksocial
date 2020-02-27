@@ -3,17 +3,19 @@ package info.devlink.api.core.contact;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @AllArgsConstructor
 @Getter
+@Setter
 public class Contact {
-    private final int developerId;
-    private final int recruiterId;
-    private final int contactId;
-    private final String email;
-    private final String phoneNumber;
-    private final String serviceAddress;
+    private int developerId;
+    private int recruiterId;
+    private int contactId;
+    private String email;
+    private String phoneNumber;
+    private String serviceAddress;
 
     public Contact() {
         developerId = 0;

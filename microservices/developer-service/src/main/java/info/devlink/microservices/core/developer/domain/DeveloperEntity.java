@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @Setter
 @Document(collection = "developers")
-public class Developer {
+public class DeveloperEntity {
 
     @Id
     private String id;
@@ -22,7 +22,7 @@ public class Developer {
     @Indexed(unique = true)
     private int developerId;
 
-    public Developer(int developerId, String firstName, String lastName, String developerType) {
+    public DeveloperEntity(int developerId, String firstName, String lastName, String developerType) {
         this.developerId = developerId;
         this.firstName = firstName;
         this.lastName = lastName;

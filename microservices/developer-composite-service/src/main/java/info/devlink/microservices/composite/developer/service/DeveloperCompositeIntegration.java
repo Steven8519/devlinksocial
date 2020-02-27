@@ -60,6 +60,22 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
         contactServiceUrl         = "http://" + contactServiceHost + ":" + contactServicePort + "/contact?developerId=";
     }
 
+    @Override
+    public Developer createDeveloper(Developer body) {
+        try {
+            String url = developerServiceUrl;
+            LOG.debug("Will post a new developer to URL: {}", url);
+
+            Developer developer = restTemplate.postForObject(url, body, Developer.class);
+            LOG.debug("Created a developer with id: {}", developer.getDeveloperId());
+
+            return developer;
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
     public Developer getDeveloper(int developerId) {
 
         try {
@@ -89,11 +105,40 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
         }
     }
 
+    @Override
+    public void deleteDeveloper(int developerId) {
+        try {
+            String url = developerServiceUrl + "/" + developerId;
+            LOG.debug("Will call the deleteDeveloper API on URL: {}", url);
+
+            restTemplate.delete(url);
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
     private String getErrorMessage(HttpClientErrorException ex) {
         try {
             return mapper.readValue(ex.getResponseBodyAsString(), HttpErrorInfo.class).getMessage();
         } catch (IOException ioex) {
             return ex.getMessage();
+        }
+    }
+
+    @Override
+    public Recruiter createRecruiter(Recruiter body) {
+        try {
+            String url = recruiterServiceUrl;
+            LOG.debug("Will post a new recruiter to URL: {}", url);
+
+            Recruiter recruiter = restTemplate.postForObject(url, body, Recruiter.class);
+            LOG.debug("Created a recruiter with id: {}", recruiter.getDeveloperId());
+
+            return recruiter;
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
         }
     }
 
@@ -114,6 +159,35 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
         }
     }
 
+    @Override
+    public void deleteRecruiters(int developerId) {
+        try {
+            String url = recruiterServiceUrl + "?developerId=" + developerId;
+            LOG.debug("Will call the deleteRecommendations API on URL: {}", url);
+
+            restTemplate.delete(url);
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
+    @Override
+    public Contact createContact(Contact body) {
+        try {
+            String url = contactServiceUrl;
+            LOG.debug("Will post a new contact to URL: {}", url);
+
+            Contact contact = restTemplate.postForObject(url, body, Contact.class);
+            LOG.debug("Created a contact with id: {}", contact.getDeveloperId());
+
+            return contact;
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
+        }
+    }
+
     public List<Contact> getContacts(int developerId) {
 
         try {
@@ -128,6 +202,35 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
         } catch (Exception ex) {
             LOG.warn("Got an exception while requesting contacts, return zero contacts: {}", ex.getMessage());
             return new ArrayList<>();
+        }
+    }
+
+    private RuntimeException handleHttpClientException(HttpClientErrorException ex) {
+        switch (ex.getStatusCode()) {
+
+            case NOT_FOUND:
+                return new NotFoundException(getErrorMessage(ex));
+
+            case UNPROCESSABLE_ENTITY :
+                return new InvalidInputException(getErrorMessage(ex));
+
+            default:
+                LOG.warn("Got a unexpected HTTP error: {}, will rethrow it", ex.getStatusCode());
+                LOG.warn("Error body: {}", ex.getResponseBodyAsString());
+                return ex;
+        }
+    }
+
+    @Override
+    public void deleteContacts(int developerId) {
+        try {
+            String url = contactServiceUrl + "?developerId=" + developerId;
+            LOG.debug("Will call the deleteContacts API on URL: {}", url);
+
+            restTemplate.delete(url);
+
+        } catch (HttpClientErrorException ex) {
+            throw handleHttpClientException(ex);
         }
     }
 

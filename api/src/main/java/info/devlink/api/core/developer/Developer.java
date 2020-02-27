@@ -3,16 +3,18 @@ package info.devlink.api.core.developer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @AllArgsConstructor
 @Getter
+@Setter
 public class Developer {
-    private final int developerId;
-    private final String firstName;
-    private final String lastName;
-    private final String developerType;
-    private final String serviceAddress;
+    private int developerId;
+    private String firstName;
+    private String lastName;
+    private String developerType;
+    private String serviceAddress;
 
     public Developer() {
         developerId = 0;

@@ -1,13 +1,13 @@
 package info.devlink.microservices.core.contact.repository;
 
-import info.devlink.microservices.core.contact.domain.Contact;
+import info.devlink.microservices.core.contact.domain.ContactEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface ContactRepository extends CrudRepository<Contact, Integer> {
+public interface ContactRepository extends CrudRepository<ContactEntity, Integer> {
 
     @Transactional(readOnly = true)
-    List<Contact> findByDeveloperId(int developerId);
+    List<ContactEntity> findByDeveloperId(int developerId);
 }

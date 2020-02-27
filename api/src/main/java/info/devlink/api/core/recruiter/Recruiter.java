@@ -3,17 +3,19 @@ package info.devlink.api.core.recruiter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @AllArgsConstructor
 @Getter
+@Setter
 public class Recruiter {
-    private final int developerId;
-    private final int recruiterId;
-    private final String recruiterName;
-    private final String recruitingCompany;
-    private final String companyRating;
-    private final String serviceAddress;
+    private int developerId;
+    private int recruiterId;
+    private String recruiterName;
+    private String recruitingCompany;
+    private String companyRating;
+    private String serviceAddress;
 
     public Recruiter() {
         developerId = 0;
