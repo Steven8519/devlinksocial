@@ -163,7 +163,7 @@ public class DeveloperCompositeIntegration implements DeveloperService, Recruite
     public void deleteRecruiters(int developerId) {
         try {
             String url = recruiterServiceUrl + "?developerId=" + developerId;
-            LOG.debug("Will call the deleteRecommendations API on URL: {}", url);
+            LOG.debug("Will call the deleteRecruiters API on URL: {}", url);
 
             restTemplate.delete(url);
 
