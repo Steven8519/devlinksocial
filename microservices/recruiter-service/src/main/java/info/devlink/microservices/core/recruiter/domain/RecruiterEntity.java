@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -26,4 +25,12 @@ public class RecruiterEntity {
     private String recruiterName;
     private String recruitingCompany;
     private String companyRating;
+
+    public RecruiterEntity(int developerId, int recruiterId, String recruiterName, String recruitingCompany, String companyRating) {
+        this.developerId = developerId;
+        this.recruiterId = recruiterId;
+        this.recruiterName = recruiterName;
+        this.recruitingCompany = recruitingCompany;
+        this.companyRating = companyRating;
+    }
 }
