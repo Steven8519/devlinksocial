@@ -22,7 +22,7 @@ api:
         If the requested developer id is found the method will return information regarding:
         1. Developer information
         1. Reviews
-        1. Recommendations
+        1. Recruiters
         1. Service Addresses
         (technical information regarding the addresses of the microservices that created the response)
 

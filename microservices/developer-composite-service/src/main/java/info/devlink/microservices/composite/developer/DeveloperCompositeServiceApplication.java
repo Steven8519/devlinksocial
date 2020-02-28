@@ -74,7 +74,7 @@ public class DeveloperCompositeServiceApplication {
 		ReactiveHealthIndicatorRegistry registry = new DefaultReactiveHealthIndicatorRegistry(new LinkedHashMap<>());
 
 		registry.register("developer", () -> integration.getDeveloperHealth());
-		registry.register("recommendation", () -> integration.getRecruiterHealth());
+		registry.register("recruiter", () -> integration.getRecruiterHealth());
 		registry.register("contact", () -> integration.getContactHealth());
 
 		return new CompositeReactiveHealthIndicator(healthAggregator, registry);
