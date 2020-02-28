@@ -10,14 +10,15 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RecruiterMapper {
+
     @Mappings({
-            @Mapping(target = "recruiterName", source="entity.recruiterName"),
+            @Mapping(target = "recruiterName", source="entity.name"),
             @Mapping(target = "serviceAddress", ignore = true)
     })
     Recruiter entityToApi(RecruiterEntity entity);
 
     @Mappings({
-            @Mapping(target = "recruiterName", source="api.recruiterName"),
+            @Mapping(target = "name", source="api.recruiterName"),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "version", ignore = true)
     })

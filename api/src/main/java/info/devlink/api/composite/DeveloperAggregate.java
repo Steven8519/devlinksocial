@@ -3,7 +3,6 @@ package info.devlink.api.composite;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -18,5 +17,15 @@ public class DeveloperAggregate {
     private final List<RecruiterSummary> recruiters;
     private final List<ContactSummary> contacts;
     private final ServiceAddresses serviceAddresses;
+
+    public DeveloperAggregate() {
+        developerId = 0;
+        firstName = null;
+        lastName = null;
+        developerType = null;
+        recruiters = null;
+        contacts = null;
+        serviceAddresses = null;
+    }
 
 }

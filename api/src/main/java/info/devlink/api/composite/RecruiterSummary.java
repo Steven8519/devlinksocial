@@ -8,11 +8,15 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class RecruiterSummary {
-    private final int developerId;
-    private final int RecruiterId;
+    private final int recruiterId;
     private final String recruiterName;
-    private final String recruiterCompany;
+    private final String recruitingCompany;
     private final String companyRating;
 
-
+    public RecruiterSummary() {
+        this.recruiterId = 0;
+        this.recruiterName = null;
+        this.recruitingCompany = null;
+        this.companyRating = null;
+    }
 }

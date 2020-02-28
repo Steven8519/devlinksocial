@@ -12,9 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
+
+import static reactor.core.publisher.Mono.error;
 
 @RestController
 public class DeveloperServiceImpl implements DeveloperService {
+
     private static final Logger LOG = LoggerFactory.getLogger(DeveloperServiceImpl.class);
 
     private final ServiceUtil serviceUtil;
@@ -32,37 +36,39 @@ public class DeveloperServiceImpl implements DeveloperService {
 
     @Override
     public Developer createDeveloper(Developer body) {
-        try {
-            DeveloperEntity entity = mapper.apiToEntity(body);
-            DeveloperEntity newEntity = repository.save(entity);
 
-            LOG.debug("createDeveloper: entity created for developerId: {}", body.getDeveloperId());
-            return mapper.entityToApi(newEntity);
+        if (body.getDeveloperId() < 1) throw new InvalidInputException("Invalid developerId: " + body.getDeveloperId());
 
-        } catch (DuplicateKeyException dke) {
-            throw new InvalidInputException("Duplicate key, Developer Id: " + body.getDeveloperId());
-        }
+        DeveloperEntity entity = mapper.apiToEntity(body);
+        Mono<Developer> newEntity = repository.save(entity)
+                .log()
+                .onErrorMap(
+                        DuplicateKeyException.class,
+                        ex -> new InvalidInputException("Duplicate key, Developer Id: " + body.getDeveloperId()))
+                .map(e -> mapper.entityToApi(e));
+
+        return newEntity.block();
     }
 
     @Override
-    public Developer getDeveloper(int developerId) {
+    public Mono<Developer> getDeveloper(int developerId) {
 
         if (developerId < 1) throw new InvalidInputException("Invalid developerId: " + developerId);
 
-        DeveloperEntity entity = repository.findByDeveloperId(developerId)
-                .orElseThrow(() -> new NotFoundException("No developer found for developerId: " + developerId));
-
-        Developer response = mapper.entityToApi(entity);
-        response.setServiceAddress(serviceUtil.getServiceAddress());
-
-        LOG.debug("getDeveloper: found developerId: {}", response.getDeveloperId());
-
-        return response;
+        return repository.findByDeveloperId(developerId)
+                .switchIfEmpty(error(new NotFoundException("No developer found for developerId: " + developerId)))
+                .log()
+                .map(e -> mapper.entityToApi(e))
+                .map(e -> {e.setServiceAddress(serviceUtil.getServiceAddress()); return e;});
     }
 
     @Override
     public void deleteDeveloper(int developerId) {
+
+        if (developerId < 1) throw new InvalidInputException("Invalid developerId: " + developerId);
+
         LOG.debug("deleteDeveloper: tries to delete an entity with developerId: {}", developerId);
-        repository.findByDeveloperId(developerId).ifPresent(e -> repository.delete(e));
+        repository.findByDeveloperId(developerId).log().map(e -> repository.delete(e)).flatMap(e -> e).block();
     }
+
 }

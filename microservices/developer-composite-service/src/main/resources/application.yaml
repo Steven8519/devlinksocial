@@ -1,3 +1,53 @@
+api:
+
+  common:
+    version: 1.0.0
+    title: Sample API
+    description: Description of the API...
+    termsOfServiceUrl: MINE TERMS OF SERVICE URL
+    license: License
+    licenseUrl: MY LICENSE URL
+
+    contact:
+      name: Contact
+      url: My
+      email: me@mail.com
+
+  developer-composite:
+
+    get-composite-developer:
+      description: Returns a composite view of the specified developer id
+      notes: |
+        # Normal response
+        If the requested developer id is found the method will return information regarding:
+        1. Developer information
+        1. Reviews
+        1. Recommendations
+        1. Service Addresses
+        (technical information regarding the addresses of the microservices that created the response)
+
+        # Expected partial and error responses
+        1. If no developer information is found, a <b>404 - Not Found</b> error will be returned
+        1. In no recruiters or contacts are found for a developer, a partial response will be returned
+
+    create-composite-developer:
+      description: Creates a composite developer
+      notes: |
+        # Normal response
+        The composite developer information posted to the API will be splitted up and stored as separate developer-info, recruiter and contact entities.
+
+        # Expected error responses
+        1. If a developer with the same developerId as specified in the posted information already exists,
+           an <b>422 - Unprocessable Entity</b> error with a "duplicate key" error message will be returned
+
+    delete-composite-developer:
+      description: Deletes a developer composite
+      notes: |
+        # Normal response
+        Entities for developer information, recruiters and contacts related to the specificed developerId will be deleted.
+        The implementation of the delete method is idempotent, i.e. it can be called several times with the same response.
+        This means that a delete request of a non existing developer will return <b>200 Ok</b>.
+
 server.port: 8000
 
 app:
@@ -11,11 +61,40 @@ app:
     host: localhost
     port: 8003
 
+spring.cloud.stream:
+  defaultBinder: rabbit
+  default.contentType: application/json
+  bindings:
+    output-developers:
+      destination: developers
+      producer:
+        required-groups: auditGroup
+    output-recruiters:
+      destination: recruiters
+      producer:
+        required-groups: auditGroup
+    output-contacts:
+      destination: contacts
+      producer:
+        required-groups: auditGroup
+
+spring.cloud.stream.kafka.binder:
+  brokers: 127.0.0.1
+  defaultBrokerPort: 9092
+
+spring.rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+
 logging:
   level:
     root: INFO
     info.devlink: DEBUG
 
+management.endpoint.health.show-details: "ALWAYS"
+management.endpoints.web.exposure.include: "*"
 ---
 spring.profiles: docker
 
@@ -31,3 +110,7 @@ app:
   contact-service:
     host: contact
     port: 8080
+
+spring.rabbitmq.host: rabbitmq
+
+spring.cloud.stream.kafka.binder.brokers: kafka

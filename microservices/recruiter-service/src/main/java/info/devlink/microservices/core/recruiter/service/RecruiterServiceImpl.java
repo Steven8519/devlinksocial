@@ -10,10 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-
+@RestController
 public class RecruiterServiceImpl implements RecruiterService {
+
     private static final Logger LOG = LoggerFactory.getLogger(RecruiterServiceImpl.class);
 
     private final RecruiterRepository repository;
@@ -29,37 +32,37 @@ public class RecruiterServiceImpl implements RecruiterService {
         this.serviceUtil = serviceUtil;
     }
 
+
     @Override
     public Recruiter createRecruiter(Recruiter body) {
-        try {
-            RecruiterEntity entity = mapper.apiToEntity(body);
-            RecruiterEntity newEntity = repository.save(entity);
+        if (body.getDeveloperId() < 1) throw new InvalidInputException("Invalid developerId: " + body.getDeveloperId());
 
-            LOG.debug("createRecruiter: created a recruiter entity: {}/{}", body.getDeveloperId(), body.getRecruiterId());
-            return mapper.entityToApi(newEntity);
+        RecruiterEntity entity = mapper.apiToEntity(body);
+        Mono<Recruiter> newEntity = repository.save(entity)
+                .log()
+                .onErrorMap(
+                        DuplicateKeyException.class,
+                        ex -> new InvalidInputException("Duplicate key, Developer Id: " + body.getDeveloperId() + ", Recruiter Id:" + body.getRecruiterId()))
+                .map(e -> mapper.entityToApi(e));
 
-        } catch (DuplicateKeyException dke) {
-            throw new InvalidInputException("Duplicate key, Developer Id: " + body.getDeveloperId() + ", Recruiter Id:" + body.getRecruiterId());
-        }
+        return newEntity.block();
     }
 
     @Override
-    public List<Recruiter> getRecruiters(int developerId) {
-
+    public Flux<Recruiter> getRecruiters(int developerId) {
         if (developerId < 1) throw new InvalidInputException("Invalid developerId: " + developerId);
 
-        List<RecruiterEntity> entityList = repository.findByDeveloperId(developerId);
-        List<Recruiter> list = mapper.entityListToApiList(entityList);
-        list.forEach(e -> e.setServiceAddress(serviceUtil.getServiceAddress()));
-
-        LOG.debug("getRecruiters: response size: {}", list.size());
-
-        return list;
+        return repository.findByDeveloperId(developerId)
+                .log()
+                .map(e -> mapper.entityToApi(e))
+                .map(e -> {e.setServiceAddress(serviceUtil.getServiceAddress()); return e;});
     }
 
     @Override
     public void deleteRecruiters(int developerId) {
+        if (developerId < 1) throw new InvalidInputException("Invalid developerId: " + developerId);
+
         LOG.debug("deleteRecruiters: tries to delete recruiters for the developer with developerId: {}", developerId);
-        repository.deleteAll(repository.findByDeveloperId(developerId));
+        repository.deleteAll(repository.findByDeveloperId(developerId)).block();
     }
 }

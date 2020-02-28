@@ -24,7 +24,7 @@ public class MapperTest {
         ContactEntity entity = mapper.apiToEntity(api);
 
         assertEquals(api.getDeveloperId(), entity.getDeveloperId());
-        assertEquals(api.getRecruiterId(), entity.getRecruiterId());
+        assertEquals(api.getContactId(), entity.getContactId());
         assertEquals(api.getContactId(), entity.getContactId());
         assertEquals(api.getEmail(), entity.getEmail());
         assertEquals(api.getPhoneNumber(), entity.getPhoneNumber());
@@ -32,7 +32,7 @@ public class MapperTest {
         Contact api2 = mapper.entityToApi(entity);
 
         assertEquals(api.getDeveloperId(), api2.getDeveloperId());
-        assertEquals(api.getRecruiterId(), api2.getRecruiterId());
+        assertEquals(api.getContactId(), api2.getContactId());
         assertEquals(api.getContactId(), api2.getContactId());
         assertEquals(api.getEmail(), api2.getEmail());
         assertEquals(api.getPhoneNumber(), api2.getPhoneNumber());
@@ -53,7 +53,7 @@ public class MapperTest {
         ContactEntity entity = entityList.get(0);
 
         assertEquals(api.getDeveloperId(), entity.getDeveloperId());
-        assertEquals(api.getRecruiterId(), entity.getRecruiterId());
+        assertEquals(api.getContactId(), entity.getContactId());
         assertEquals(api.getContactId(), entity.getContactId());
         assertEquals(api.getEmail(), entity.getEmail());
         assertEquals(api.getPhoneNumber(), entity.getPhoneNumber());

@@ -1,10 +1,9 @@
 package info.devlink.microservices.core.developer.repository;
 
 import info.devlink.microservices.core.developer.domain.DeveloperEntity;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-
-public interface DeveloperRepository extends PagingAndSortingRepository<DeveloperEntity, String > {
-    Optional<DeveloperEntity> findByDeveloperId(int developerId);
+public interface DeveloperRepository extends ReactiveCrudRepository<DeveloperEntity, String > {
+    Mono<DeveloperEntity> findByDeveloperId(int developerId);
 }

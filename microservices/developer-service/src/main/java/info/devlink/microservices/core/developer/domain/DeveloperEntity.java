@@ -22,6 +22,12 @@ public class DeveloperEntity {
     @Indexed(unique = true)
     private int developerId;
 
+    private String firstName;
+
+    private String lastName;
+
+    private String developerType;
+
     public DeveloperEntity(int developerId, String firstName, String lastName, String developerType) {
         this.developerId = developerId;
         this.firstName = firstName;
@@ -29,9 +35,5 @@ public class DeveloperEntity {
         this.developerType = developerType;
     }
 
-    private String firstName;
 
-    private String lastName;
-
-    private String developerType;
 }

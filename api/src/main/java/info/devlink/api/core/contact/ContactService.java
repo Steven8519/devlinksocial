@@ -1,23 +1,12 @@
 package info.devlink.api.core.contact;
 
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import reactor.core.publisher.Flux;
 
 public interface ContactService {
-    /**
-     * Sample usage:
-     *
-     * curl -X POST $HOST:$PORT/contact \
-     *   -H "Content-Type: application/json" --data
-     *
-     * @param body
-     * @return
-     */
-    @PostMapping(
-            value    = "/contact",
-            consumes = "application/json",
-            produces = "application/json")
+
     Contact createContact(@RequestBody Contact body);
 
     /**
@@ -29,15 +18,8 @@ public interface ContactService {
     @GetMapping(
             value    = "/contact",
             produces = "application/json")
-    List<Contact> getContacts(@RequestParam(value = "developerId", required = true) int developerId);
+    Flux<Contact> getContacts(@RequestParam(value = "developerId", required = true) int developerId);
 
-    /**
-     * Sample usage:
-     *
-     * curl -X DELETE $HOST:$PORT/contact?developerId=1
-     *
-     * @param developerId
-     */
-    @DeleteMapping(value = "/contact")
     void deleteContacts(@RequestParam(value = "developerId", required = true)  int developerId);
+
 }

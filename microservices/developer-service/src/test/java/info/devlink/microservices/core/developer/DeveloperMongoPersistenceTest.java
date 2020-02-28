@@ -9,19 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static java.util.stream.IntStream.rangeClosed;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.springframework.data.domain.Sort.Direction.ASC;
+import reactor.test.StepVerifier;
 
 @RunWith(SpringRunner.class)
 @DataMongoTest
@@ -29,115 +18,79 @@ public class DeveloperMongoPersistenceTest {
     @Autowired
     private DeveloperRepository repository;
 
-    private DeveloperEntity savedDeveloper;
+    private DeveloperEntity savedEntity;
 
     @Before
     public void setupDb() {
-        repository.deleteAll();
+        StepVerifier.create(repository.deleteAll()).verifyComplete();
 
-        DeveloperEntity developer = new DeveloperEntity(1, "Michael", "Turner", "Reactjs Developer");
-        savedDeveloper = repository.save(developer);
-
-        assertEqualsDeveloper(developer, savedDeveloper);
+        DeveloperEntity entity = new DeveloperEntity(1, "Michael", "Williams", "Java Developer");
+        StepVerifier.create(repository.save(entity))
+                .expectNextMatches(createdEntity -> {
+                    savedEntity = createdEntity;
+                    return areDeveloperEqual(entity, savedEntity);
+                })
+                .verifyComplete();
     }
 
-    @Test
-    public void create() {
 
-        DeveloperEntity newEntity = new DeveloperEntity(2, "Chris", "Mathis", "Python Developer");
-        repository.save(newEntity);
 
-        DeveloperEntity foundEntity = repository.findById(newEntity.getId()).get();
-        assertEqualsDeveloper(newEntity, foundEntity);
-
-        assertEquals(2, repository.count());
-    }
 
     @Test
     public void update() {
-        savedDeveloper.setLastName("Mathis");
-        repository.save(savedDeveloper);
+        savedEntity.setLastName("Williams");
+        StepVerifier.create(repository.save(savedEntity))
+                .expectNextMatches(updatedEntity -> updatedEntity.getLastName().equals("Williams"))
+                .verifyComplete();
 
-        DeveloperEntity foundEntity = repository.findById(savedDeveloper.getId()).get();
-        assertEquals(1, (long) foundEntity.getVersion());
-        assertEquals("Mathis", foundEntity.getLastName());
+        StepVerifier.create(repository.findById(savedEntity.getId()))
+                .expectNextMatches(foundEntity ->
+                        foundEntity.getVersion() == 1 &&
+                                foundEntity.getLastName().equals("Williams"))
+                .verifyComplete();
     }
 
     @Test
     public void delete() {
-        repository.delete(savedDeveloper);
-        assertFalse(repository.existsById(savedDeveloper.getId()));
+        StepVerifier.create(repository.delete(savedEntity)).verifyComplete();
+        StepVerifier.create(repository.existsById(savedEntity.getId())).expectNext(false).verifyComplete();
     }
 
     @Test
-    public void getByDeveloperId() {
-        Optional<DeveloperEntity> entity = repository.findByDeveloperId(savedDeveloper.getDeveloperId());
-
-        assertTrue(entity.isPresent());
-        assertEqualsDeveloper(savedDeveloper, entity.get());
-    }
-
-    @Test(expected = DuplicateKeyException.class)
     public void duplicateError() {
-        DeveloperEntity entity = new DeveloperEntity(savedDeveloper.getDeveloperId(), "Chris", "Mathis", "Python Developer");
-        repository.save(entity);
+        DeveloperEntity entity = new DeveloperEntity(savedEntity.getDeveloperId(),"Michael", "Williams", "Java Developer");
+        StepVerifier.create(repository.save(entity)).expectError(DuplicateKeyException.class).verify();
     }
 
     @Test
     public void optimisticLockError() {
 
         // Store the saved entity in two separate entity objects
-        DeveloperEntity entity1 = repository.findById(savedDeveloper.getId()).get();
-        DeveloperEntity entity2 = repository.findById(savedDeveloper.getId()).get();
+        DeveloperEntity entity1 = repository.findById(savedEntity.getId()).block();
+        DeveloperEntity entity2 = repository.findById(savedEntity.getId()).block();
 
         // Update the entity using the first entity object
-        entity1.setLastName("Hill");
-        repository.save(entity1);
+        entity1.setLastName("Turner");
+        repository.save(entity1).block();
 
-        // Update the entity using the second entity object.
+        //  Update the entity using the second entity object.
         // This should fail since the second entity now holds a old version number, i.e. a Optimistic Lock Error
-        try {
-            entity2.setLastName("James");
-            repository.save(entity2);
-
-            fail("Expected an OptimisticLockingFailureException");
-        } catch (OptimisticLockingFailureException e) {}
+        StepVerifier.create(repository.save(entity2)).expectError(OptimisticLockingFailureException.class).verify();
 
         // Get the updated entity from the database and verify its new sate
-        DeveloperEntity updatedEntity = repository.findById(savedDeveloper.getId()).get();
-        assertEquals(1, (int) updatedEntity.getVersion());
-        assertEquals("Hill", updatedEntity.getLastName());
+        StepVerifier.create(repository.findById(savedEntity.getId()))
+                .expectNextMatches(foundEntity ->
+                        foundEntity.getVersion() == 1 &&
+                                foundEntity.getLastName().equals("Turner"))
+                .verifyComplete();
     }
 
-    @Test
-    public void paging() {
-
-        repository.deleteAll();
-
-        List<DeveloperEntity> newDevelopers = rangeClosed(1001, 1010)
-                .mapToObj(i -> new DeveloperEntity(i, "Michael " , "Turner", "Reactjs Developer"))
-                .collect(Collectors.toList());
-        repository.saveAll(newDevelopers);
-
-        Pageable nextPage = PageRequest.of(0, 4, ASC, "developerId");
-        nextPage = testNextPage(nextPage, "[1001, 1002, 1003, 1004]", true);
-        nextPage = testNextPage(nextPage, "[1005, 1006, 1007, 1008]", true);
-        nextPage = testNextPage(nextPage, "[1009, 1010]", false);
-    }
-
-    private Pageable testNextPage(Pageable nextPage, String expectedDeveloperIds, boolean expectsNextPage) {
-        Page<DeveloperEntity> developerPage = repository.findAll(nextPage);
-        assertEquals(expectedDeveloperIds, developerPage.getContent().stream().map(p -> p.getDeveloperId()).collect(Collectors.toList()).toString());
-        assertEquals(expectsNextPage, developerPage.hasNext());
-        return developerPage.nextPageable();
-    }
-
-    private void assertEqualsDeveloper(DeveloperEntity expectedEntity, DeveloperEntity actualEntity) {
-        assertEquals(expectedEntity.getId(),               actualEntity.getId());
-        assertEquals(expectedEntity.getVersion(),          actualEntity.getVersion());
-        assertEquals(expectedEntity.getDeveloperId(),        actualEntity.getDeveloperId());
-        assertEquals(expectedEntity.getFirstName(),           actualEntity.getFirstName());
-        assertEquals(expectedEntity.getLastName(),           actualEntity.getLastName());
-        assertEquals(expectedEntity.getDeveloperType(),      actualEntity.getDeveloperType());
+    private boolean areDeveloperEqual(DeveloperEntity expectedEntity, DeveloperEntity actualEntity) {
+        return
+                (expectedEntity.getId().equals(actualEntity.getId())) &&
+                        (expectedEntity.getVersion() == actualEntity.getVersion()) &&
+                        (expectedEntity.getDeveloperId() == actualEntity.getDeveloperId()) &&
+                        (expectedEntity.getFirstName().equals(actualEntity.getFirstName())) &&
+                        (expectedEntity.getLastName() == actualEntity.getLastName());
     }
 }

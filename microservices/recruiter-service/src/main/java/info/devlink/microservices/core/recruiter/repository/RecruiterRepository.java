@@ -1,11 +1,9 @@
 package info.devlink.microservices.core.recruiter.repository;
 
 import info.devlink.microservices.core.recruiter.domain.RecruiterEntity;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Flux;
 
-import java.util.List;
-
-
-public interface RecruiterRepository extends CrudRepository<RecruiterEntity, String > {
-    List<RecruiterEntity> findByDeveloperId(int developerId);
+public interface RecruiterRepository extends ReactiveMongoRepository<RecruiterEntity, String > {
+    Flux<RecruiterEntity> findByDeveloperId(int developerId);
 }
